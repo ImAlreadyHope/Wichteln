@@ -1,11 +1,11 @@
-Wichteln is a small Christmas gift-exchange app for one family: Justin, Luana, Lydia, Angelika and Denis. Each person opens a personal link, writes a wishlist, and on 20 November reveals whom they give a present to. The look is clean and calm like an Apple settings screen, warmed by Christmas red, pine green and a touch of gold, and by Flocke, the Siamese cat who guides every screen.
+Wichteln is a small Christmas gift-exchange app for one family: Justin, Luana, Lydia, Angelika and Denis. Each person opens a personal link, writes a wishlist, and on 20 November reveals whom they give a present to. The look is clean and calm like an Apple settings screen, warmed by Christmas red, pine green and a touch of gold, and by Kitti, the Siamese cat who guides every screen.
 
 ## Voice and copy
 
 - Write in German, informal **du**, short and warm. "Trag ein, was du dir wünschst." not "Bitte geben Sie Ihre Wünsche ein."
 - Buttons are verbs: **Zeige meinen Wichtel**, **Wunsch hinzufügen**, **Speichern**, **Link kopieren**.
 - Name dates plainly: "Ab 20. November", "Noch 12 Tage".
-- Flocke may speak in headings ("Flocke schläft noch", "Frohes Wichteln!"); body text stays plain. No emoji in the UI.
+- Kitti may speak in headings ("Kitti schläft noch", "Frohes Wichteln!"); body text stays plain. No emoji in the UI.
 - Errors say what happened and what to do: "Dieser Link ist ungültig. Frag Denis nach deinem persönlichen Link."
 
 ## Color
@@ -30,20 +30,20 @@ Wichteln is a small Christmas gift-exchange app for one family: Justin, Luana, L
 - Depth is quiet: one `shadow-card` on raised cards, `shadow-pop` only on the revealed avatar. No bevels, no thick bottom borders, no gradients on controls.
 - Layout is a single centred column, max 480px, like a phone app, on every screen size.
 
-## Flocke, the mascot
+## Kitti, the mascot
 
-Flocke is an original Siamese cat: a round head with a cream coat and seal-brown points on the ears, face mask, paws and tail, big pointed ears, huge glossy blue eyes, a little fang in a cheeky grin, a red Santa hat and a pine-green scarf. Six poses live in **Mascot**:
+Kitti is an original Siamese cat: a round head with a cream coat and seal-brown points on the ears, face mask, paws and tail, big pointed ears, huge glossy blue eyes, a little fang in a cheeky grin, a red Santa hat and a pine-green scarf. Six poses live in **Mascot**:
 
-- `flocke-hello`: the welcome screen.
-- `flocke-thinking`: loading screens.
-- `flocke-sleep`: the locked reveal before 20 November, and the not-found page.
-- `flocke-gift`: the unlocked reveal and empty wishlists ("Noch keine Wünsche").
-- `flocke-celebrate`: while the reel spins.
-- `flocke-wink`: on the result card ("Psst, nicht verraten!").
+- `kitti-hello`: the welcome screen.
+- `kitti-thinking`: loading screens.
+- `kitti-sleep`: the locked reveal before 20 November, and the not-found page.
+- `kitti-gift`: the unlocked reveal and empty wishlists ("Noch keine Wünsche").
+- `kitti-celebrate`: while the reel spins.
+- `kitti-wink`: on the result card ("Psst, nicht verraten!").
 
 Masters are 1024px transparent PNGs in **Mascot**; the app ships 640px WebP copies in `wwwroot/img`.
 
-Show at most one Flocke per screen, 120–200px wide, on `surface` or a tinted card. Don't recolor, crop or stretch her, and don't put text over her.
+Show at most one Kitti per screen, 120–200px wide, on `surface` or a tinted card. Don't recolor, crop or stretch her, and don't put text over her.
 
 ## Icons
 
