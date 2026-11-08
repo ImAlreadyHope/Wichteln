@@ -9,14 +9,14 @@
 {
     case State.Loading:
         <div class="wi-hero" aria-busy="true">
-            <img class="wi-hero__mascot wi-bob" src="img/flocke-hello.svg" alt="" />
+            <img class="wi-hero__mascot wi-bob" src="img/flocke-thinking.webp" alt="" />
             <p class="wi-muted">Flocke sucht deine Liste …</p>
         </div>
         break;
 
     case State.NoLink:
         <div class="wi-hero">
-            <img class="wi-hero__mascot" src="img/flocke-hello.svg" alt="Flocke, die Siamkatze, winkt" />
+            <img class="wi-hero__mascot" src="img/flocke-hello.webp" alt="Flocke, die Siamkatze, winkt" />
             <h1 class="wi-hero__title">Frohes Wichteln!</h1>
             <p class="wi-hero__text">Öffne den persönlichen Link, den du bekommen hast. Damit landest du direkt bei deiner Wunschliste.</p>
             @if (_error is not null)
@@ -28,7 +28,7 @@
 
     case State.Error:
         <div class="wi-hero">
-            <img class="wi-hero__mascot" src="img/flocke-sleep.svg" alt="" />
+            <img class="wi-hero__mascot" src="img/flocke-sleep.webp" alt="" />
             <h1 class="wi-hero__title">Kurz eingenickt</h1>
             <div class="wi-notice wi-notice--danger" role="alert"><Icon Name="alert" /><span>@_error</span></div>
             <button class="wi-btn wi-btn--outline" @onclick="LoadAsync">Nochmal versuchen</button>
@@ -55,7 +55,7 @@
         @if (_state == State.Revealed && _wichtel is not null)
         {
             <section class="wi-card wi-card--red wi-result" aria-labelledby="result-title">
-                <img class="wi-result__mascot" src="img/flocke-wink.svg" alt="" />
+                <img class="wi-result__mascot" src="img/flocke-wink.webp" alt="" />
                 <p class="wi-result__eyebrow">Dein Wichtel ist</p>
                 <div class="wi-result__avatar" @ref="_burstHost">
                     <Avatar Name="@_wichtel.Person.Name" Id="_wichtel.Person.Id" Size="xl" AllNames="AllNames" />
@@ -71,6 +71,7 @@
         else if (_state == State.Spinning && _wichtel is not null)
         {
             <section class="wi-card wi-card--red wi-reveal">
+                <img class="wi-reveal__mascot" src="img/flocke-celebrate.webp" alt="" />
                 <h2 class="wi-card__title">Flocke zieht deinen Wichtel …</h2>
                 <RevealReel People="_me.Others" Target="_wichtel.Person" AllNames="AllNames" Landed="OnLandedAsync" />
             </section>
@@ -81,7 +82,7 @@
                 <div class="wi-lock">
                     @if (_me.IsUnlocked)
                     {
-                        <img class="wi-lock__mascot" src="img/flocke-gift.svg" alt="Flocke hält ein Geschenk" />
+                        <img class="wi-lock__mascot" src="img/flocke-gift.webp" alt="Flocke hält ein Geschenk" />
                         <h2 class="wi-card__title">Es ist so weit!</h2>
                         <p class="wi-card__text">Finde heraus, wen du dieses Jahr beschenkst.</p>
                         @if (_error is not null)
@@ -92,7 +93,7 @@
                     }
                     else
                     {
-                        <img class="wi-lock__mascot" src="img/flocke-sleep.svg" alt="Flocke schläft" />
+                        <img class="wi-lock__mascot" src="img/flocke-sleep.webp" alt="Flocke schläft" />
                         <h2 class="wi-card__title">Flocke schläft noch</h2>
                         <p class="wi-card__text">Am @_me.UnlockAt.ToOffset(TimeSpan.FromHours(1)).ToString("d. MMMM", German) erfährst du, wen du beschenkst.</p>
                         <Countdown Target="_me.UnlockAt" ClockOffset="_clockOffset" Reached="LoadAsync" />

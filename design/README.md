@@ -32,12 +32,16 @@ Wichteln is a small Christmas gift-exchange app for one family: Justin, Luana, L
 
 ## Flocke, the mascot
 
-Flocke is an original Siamese cat: a round head with a cream coat and seal-brown points on the ears, face mask, paws and tail, big pointed ears, huge glossy blue eyes, a little fang in a cheeky grin, a red Santa hat and a pine-green scarf. Four poses live in **Mascot**:
+Flocke is an original Siamese cat: a round head with a cream coat and seal-brown points on the ears, face mask, paws and tail, big pointed ears, huge glossy blue eyes, a little fang in a cheeky grin, a red Santa hat and a pine-green scarf. Six poses live in **Mascot**:
 
-- `flocke-hello.svg`: login and welcome screens.
-- `flocke-sleep.svg`: the locked reveal before 20 November.
-- `flocke-gift.svg`: the unlocked reveal and empty wishlists ("Noch keine Wünsche").
-- `flocke-wink.svg`: after the reveal, beside your Wichtel's list.
+- `flocke-hello`: the welcome screen.
+- `flocke-thinking`: loading screens.
+- `flocke-sleep`: the locked reveal before 20 November, and the not-found page.
+- `flocke-gift`: the unlocked reveal and empty wishlists ("Noch keine Wünsche").
+- `flocke-celebrate`: while the reel spins.
+- `flocke-wink`: on the result card ("Psst, nicht verraten!").
+
+Masters are 1024px transparent PNGs in **Mascot**; the app ships 640px WebP copies in `wwwroot/img`.
 
 Show at most one Flocke per screen, 120–200px wide, on `surface` or a tinted card. Don't recolor, crop or stretch her, and don't put text over her.
 

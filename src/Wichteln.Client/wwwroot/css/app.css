@@ -44,7 +44,8 @@ h1, h2, h3, p { margin: 0; }
 a.wi-btn--icon { display: inline-grid; place-items: center; }
 
 /* Reveal */
-.wi-reveal { display: flex; flex-direction: column; gap: var(--space-4); text-align: center; }
+.wi-reveal { display: flex; flex-direction: column; align-items: stretch; gap: var(--space-4); text-align: center; }
+.wi-reveal__mascot { width: 120px; height: auto; align-self: center; }
 .wi-reel { background: var(--surface-raised); }
 .wi-reel__item.is-near { opacity: .9; }
 .wi-avatar { position: relative; }

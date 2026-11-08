@@ -3,6 +3,7 @@ AddType application/wasm .wasm
 AddType application/octet-stream .dll .dat .blat .pdb
 AddType application/json .json
 AddType font/woff2 .woff2
+AddType image/webp .webp
 # .br is Brotli here, not the Breton language.
 RemoveLanguage .br
 

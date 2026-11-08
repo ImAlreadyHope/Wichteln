@@ -7,7 +7,7 @@ Use these to generate polished illustrations of Flocke that replace the hand-dra
 1. Run the **character sheet** prompt first, and regenerate until you like Flocke.
 2. For every pose, attach that character sheet image to the chat and paste the pose prompt. Gemini then keeps the same cat.
 3. Ask for a transparent background. If you get a solid one instead, remove it and export a square PNG, at least 1024 × 1024.
-4. Save each file under the same name as the SVG it replaces (for example `flocke-hello.png`), then change `.svg` to `.png` in `Pages/Home.razor`, `Components/WishList.razor` and `index.html`.
+4. Crop to a square and save a 1024px PNG master in `design/assets/Mascot/flocke-<pose>.png` and a 640px WebP in `src/Wichteln.Client/wwwroot/img/flocke-<pose>.webp`. The app already loads those names.
 
 Every prompt begins with the same style block so the poses match.
 
