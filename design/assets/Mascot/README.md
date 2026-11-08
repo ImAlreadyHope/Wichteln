@@ -1,1 +1,1 @@
-Flocke, the original white Persian cat mascot, in four poses (hello, sleep, gift, wink). Full color, outlines in `ink` #3a2a30; show on `surface` or a pink or green tinted card, 120–200px wide.
+Flocke, the original Siamese cat mascot, in six poses (hello, thinking, sleep, gift, celebrate, wink). 1024px transparent PNG masters from Gemini; the app uses 640px WebP copies. Show on `surface` or a red or green tinted card, 120–200px wide.

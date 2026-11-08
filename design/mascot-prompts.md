@@ -7,7 +7,7 @@ Use these to generate polished illustrations of Flocke that replace the hand-dra
 1. Run the **character sheet** prompt first, and regenerate until you like Flocke.
 2. For every pose, attach that character sheet image to the chat and paste the pose prompt. Gemini then keeps the same cat.
 3. Ask for a transparent background. If you get a solid one instead, remove it and export a square PNG, at least 1024 × 1024.
-4. Save each file under the same name as the SVG it replaces (for example `flocke-hello.png`), then change `.svg` to `.png` in `Pages/Home.razor`, `Components/WishList.razor` and `index.html`.
+4. Crop to a square and save a 1024px PNG master in `design/assets/Mascot/flocke-<pose>.png` and a 640px WebP in `src/Wichteln.Client/wwwroot/img/flocke-<pose>.webp`. The app already loads those names.
 
 Every prompt begins with the same style block so the poses match.
 
@@ -15,14 +15,14 @@ Every prompt begins with the same style block so the poses match.
 
 ## Style block (already included in every prompt below)
 
-> Cute kawaii mascot illustration of "Flocke", an original white Persian cat character. Very round, extra-fluffy head with scalloped fur edges and fluffy cheek tufts, a flat Persian face, small rounded ears set low and wide with soft pink insides, huge glossy dark-brown eyes with two white highlights each, pink oval blush on the cheeks, a tiny pink nose, and a cheeky open grin showing one tiny fang. Chubby round body, short stubby paws, a big fluffy tail. Wears a red Santa hat (#C8283C) with a white fluffy brim and pom-pom, tilted to one side, and a pine-green knitted scarf (#1F6B45) with white stripes. Playful, mischievous, expressive cartoon energy with big emotions and squashy shapes. Clean flat vector sticker style with a consistent thick dark plum-brown outline (#2E2224), soft cel shading in very light grey-pink on the white fur, no gradients, no texture. Centered full body, generous padding, transparent background, no text, no logo, no shadow on the ground.
+> Cute kawaii mascot illustration of "Flocke", an original Siamese cat character. Big round head, soft cream-white short coat (#FBF3E8) with classic Siamese seal-brown points (#6B4A3A) on the large pointed ears, the face mask around the muzzle, the paws and the slim tail. Huge glossy sapphire-blue eyes with dark pupils and two white highlights each, pink oval blush on the cheeks, a tiny dark nose, and a cheeky open grin showing one tiny fang. Pink inner ears, chubby round body, short stubby paws. Wears a red Santa hat (#C8283C) with a white fluffy brim and pom-pom, tilted to one side, and a pine-green knitted scarf (#1F6B45) with white stripes. Playful, mischievous, expressive cartoon energy with big emotions and squashy shapes. Clean flat vector sticker style with a consistent thick dark plum-brown outline (#2E2224), soft cel shading in light beige on the cream fur, no gradients, no texture. Centered full body, generous padding, transparent background, no text, no logo, no shadow on the ground.
 
 ---
 
 ## 1. Character sheet (do this first)
 
 ```
-Cute kawaii mascot illustration of "Flocke", an original white Persian cat character. Very round, extra-fluffy head with scalloped fur edges and fluffy cheek tufts, a flat Persian face, small rounded ears set low and wide with soft pink insides, huge glossy dark-brown eyes with two white highlights each, pink oval blush on the cheeks, a tiny pink nose, and a cheeky open grin showing one tiny fang. Chubby round body, short stubby paws, a big fluffy tail. Wears a red Santa hat (#C8283C) with a white fluffy brim and pom-pom, tilted to one side, and a pine-green knitted scarf (#1F6B45) with white stripes. Playful, mischievous, expressive cartoon energy with big emotions and squashy shapes. Clean flat vector sticker style with a consistent thick dark plum-brown outline (#2E2224), soft cel shading in very light grey-pink on the white fur, no gradients, no texture. Transparent background, no text, no logo.
+Cute kawaii mascot illustration of "Flocke", an original Siamese cat character. Big round head, soft cream-white short coat (#FBF3E8) with classic Siamese seal-brown points (#6B4A3A) on the large pointed ears, the face mask around the muzzle, the paws and the slim tail. Huge glossy sapphire-blue eyes with dark pupils and two white highlights each, pink oval blush on the cheeks, a tiny dark nose, and a cheeky open grin showing one tiny fang. Pink inner ears, chubby round body, short stubby paws. Wears a red Santa hat (#C8283C) with a white fluffy brim and pom-pom, tilted to one side, and a pine-green knitted scarf (#1F6B45) with white stripes. Playful, mischievous, expressive cartoon energy with big emotions and squashy shapes. Clean flat vector sticker style with a consistent thick dark plum-brown outline (#2E2224), soft cel shading in light beige on the cream fur, no gradients, no texture. Transparent background, no text, no logo.
 
 Character turnaround sheet: front view, three-quarter view and side view of Flocke standing on all fours, plus a close-up of the face, evenly spaced in one row on a plain white background.
 ```
@@ -80,5 +80,6 @@ Pose: Flocke sits with one paw on her chin and looks up and to the side, curious
 **Tips**
 
 - If the cat comes out too realistic, add: *"simple shapes, chibi proportions, head as big as the body"*.
+- If the points come out grey or blurry, add: *"crisp seal-brown Siamese points with a clean edge, no colour gradient"*.
 - If the outline varies in thickness, add: *"uniform 6px outline, sticker die-cut look"*.
 - Keep the same chat open for every pose so Gemini keeps the same character.
