@@ -1,0 +1,84 @@
+/* App layout on top of the design system (tokens.css + components.css). */
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; min-height: 100vh; }
+h1, h2, h3, p { margin: 0; }
+
+.wi-page {
+  max-width: 480px;
+  margin: 0 auto;
+  padding-top: max(var(--space-4), env(safe-area-inset-top));
+  padding-bottom: max(var(--space-12), env(safe-area-inset-bottom));
+  padding-left: max(var(--space-4), env(safe-area-inset-left));
+  padding-right: max(var(--space-4), env(safe-area-inset-right));
+  display: flex; flex-direction: column; gap: var(--space-6);
+}
+
+.wi-sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* Welcome, loading and error screens */
+.wi-hero { display: flex; flex-direction: column; align-items: center; text-align: center; gap: var(--space-4); padding-top: var(--space-12); }
+.wi-hero__mascot { width: 200px; height: auto; }
+.wi-hero__title { font: 600 40px/44px var(--font-display); letter-spacing: -.01em; color: var(--ink); text-wrap: balance; }
+.wi-hero__text { max-width: 34ch; color: var(--ink-muted); font-weight: 600; }
+.wi-hero .wi-notice { text-align: left; }
+.wi-bob { animation: wi-bob 1.6s ease-in-out infinite; }
+@keyframes wi-bob { 50% { transform: translateY(-6px) rotate(-2deg); } }
+
+/* Sections */
+.wi-section { display: flex; flex-direction: column; gap: var(--space-3); }
+.wi-section__head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); }
+.wi-section__title { font: 600 20px/26px var(--font-display); color: var(--ink); }
+.wi-appbar__name { font-size: 20px; }
+
+/* Wish form */
+.wi-wishform { display: flex; flex-direction: column; gap: var(--space-4); width: 100%; }
+.wi-wishform__actions { display: flex; justify-content: flex-end; gap: var(--space-2); flex-wrap: wrap; }
+.wi-item--form { padding: var(--space-4); }
+
+/* Danger button for delete confirmation */
+.wi-btn--danger { background: var(--danger); color: var(--surface-raised); height: 36px; padding: 0 var(--space-3); }
+.wi-btn--danger:hover:not(:disabled) { filter: brightness(.92); }
+.wi-item__actions .wi-btn--ghost:not(.wi-btn--icon) { height: 36px; padding: 0 var(--space-3); }
+.wi-item__actions .wi-btn--icon { color: var(--ink-muted); }
+.wi-item__actions .wi-btn--icon:hover { color: var(--red-700); }
+a.wi-btn--icon { display: inline-grid; place-items: center; }
+
+/* Reveal */
+.wi-reveal { display: flex; flex-direction: column; gap: var(--space-4); text-align: center; }
+.wi-reel { background: var(--surface-raised); }
+.wi-reel__item.is-near { opacity: .9; }
+.wi-avatar { position: relative; }
+.wi-avatar img { position: absolute; inset: 0; }
+
+.wi-result { position: relative; display: flex; flex-direction: column; align-items: center; text-align: center; gap: var(--space-3); padding-top: var(--space-8); animation: wi-pop .5s cubic-bezier(.2,.9,.3,1.2); }
+.wi-result__eyebrow { font-size: 14px; line-height: 20px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; color: var(--red-700); }
+.wi-result__name { font: 600 40px/44px var(--font-display); letter-spacing: -.01em; color: var(--ink); }
+.wi-result__avatar { position: relative; }
+.wi-result__avatar .wi-avatar--xl { box-shadow: 0 0 0 4px var(--surface-raised), 0 0 0 8px var(--gold), var(--shadow-pop); }
+.wi-result__mascot { position: absolute; right: var(--space-2); top: 132px; width: 88px; transform: rotate(8deg); }
+@keyframes wi-pop { from { transform: scale(.92); opacity: 0; } }
+
+.wi-confetti {
+  position: absolute; left: 50%; top: 50%; width: 10px; height: 14px; border-radius: 3px; z-index: 2;
+  pointer-events: none; animation: wi-confetti 1.2s cubic-bezier(.2,.7,.3,1) forwards;
+}
+@keyframes wi-confetti {
+  from { transform: translate(-50%, -50%) rotate(0); opacity: 1; }
+  to { transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy) + 60px)) rotate(var(--r)); opacity: 0; }
+}
+
+@media (max-width: 380px) {
+  .wi-result__mascot { width: 64px; top: 150px; }
+  .wi-lock__unit { min-width: 56px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wi-bob, .wi-result { animation: none; }
+}
+
+#blazor-error-ui {
+  display: none; position: fixed; left: 0; right: 0; bottom: 0; z-index: 1000;
+  padding: var(--space-3) var(--space-4) max(var(--space-3), env(safe-area-inset-bottom));
+  background: var(--danger-100); color: var(--danger); font-weight: 700;
+}
+#blazor-error-ui .dismiss { float: right; background: none; border: 0; color: inherit; font-size: 20px; cursor: pointer; }

@@ -1,0 +1,15 @@
+<!-- @dsCard group="Forms" height=230 subtitle="label, input, helper, error" -->
+<!doctype html>
+<html lang="de">
+<head><meta charset="utf-8"><title>preview</title>
+<style>html,body{margin:0} body{padding:16px} </style></head>
+<body class="wi-root">
+
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px">
+  <div class="wi-field"><label class="wi-label" for="w">Wunsch</label><input class="wi-input" id="w" value="Kuschelsocken mit Katzen"><span class="wi-help">Was wünschst du dir?</span></div>
+  <div class="wi-field"><label class="wi-label" for="l">Link (optional)</label><input class="wi-input" id="l" placeholder="https://…"><span class="wi-help">Ein Link zum Produkt hilft deinem Wichtel.</span></div>
+  <div class="wi-field"><label class="wi-label" for="e">Link</label><input class="wi-input" id="e" value="amazon de/socken" aria-invalid="true"><span class="wi-help wi-help--error">Der Link muss mit https:// beginnen.</span></div>
+</div>
+
+</body>
+</html>

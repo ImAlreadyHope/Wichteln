@@ -1,0 +1,21 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+      - run: dotnet test --configuration Release
+      - run: dotnet publish src/Wichteln.Client -c Release -o publish/client
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wichteln-site
+          path: publish/client/wwwroot

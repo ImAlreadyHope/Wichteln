@@ -1,0 +1,57 @@
+<form class="wi-wishform" @onsubmit="SubmitAsync" novalidate>
+    <div class="wi-field">
+        <label class="wi-label" for="@($"t{_uid}")">Wunsch</label>
+        <input class="wi-input" id="@($"t{_uid}")" @bind="_title" @bind:event="oninput" maxlength="@WishRules.MaxTitleLength"
+               placeholder="z. B. Kuschelsocken mit Katzen" aria-invalid="@(_error is not null && _errorOnTitle ? "true" : "false")" autocomplete="off" />
+    </div>
+    <div class="wi-field">
+        <label class="wi-label" for="@($"u{_uid}")">Link <span class="wi-muted">(optional)</span></label>
+        <input class="wi-input" id="@($"u{_uid}")" type="url" inputmode="url" @bind="_url" @bind:event="oninput" maxlength="@WishRules.MaxUrlLength"
+               placeholder="https://…" aria-invalid="@(_error is not null && !_errorOnTitle ? "true" : "false")" autocomplete="off" />
+        @if (_error is not null)
+        {
+            <span class="wi-help wi-help--error" role="alert">@_error</span>
+        }
+        else
+        {
+            <span class="wi-help">Ein Link zum Produkt hilft deinem Wichtel.</span>
+        }
+    </div>
+    <div class="wi-wishform__actions">
+        <button type="button" class="wi-btn wi-btn--outline" @onclick="OnCancel">Abbrechen</button>
+        <button type="submit" class="wi-btn wi-btn--primary" disabled="@_busy">@SubmitLabel</button>
+    </div>
+</form>
+
+@code {
+    [Parameter] public WishDto? Initial { get; set; }
+    [Parameter] public string SubmitLabel { get; set; } = "Speichern";
+    [Parameter, EditorRequired] public Func<WishInput, Task<string?>> OnSubmit { get; set; } = default!;
+    [Parameter] public EventCallback OnCancel { get; set; }
+
+    private static int _counter;
+    private readonly int _uid = Interlocked.Increment(ref _counter);
+    private string _title = "", _url = "";
+    private string? _error;
+    private bool _errorOnTitle, _busy;
+
+    protected override void OnInitialized()
+    {
+        _title = Initial?.Title ?? "";
+        _url = Initial?.Url ?? "";
+    }
+
+    private async Task SubmitAsync()
+    {
+        var url = _url.Trim();
+        // Accept "amazon.de/…" without a scheme.
+        if (url.Length > 0 && !url.Contains("://")) url = "https://" + url;
+        var input = new WishInput(_title, url);
+        _error = WishRules.Validate(input);
+        _errorOnTitle = string.IsNullOrWhiteSpace(_title) || _title.Trim().Length > WishRules.MaxTitleLength;
+        if (_error is not null) return;
+        _busy = true;
+        _error = await OnSubmit(input);
+        _busy = false;
+    }
+}

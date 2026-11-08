@@ -1,0 +1,132 @@
+@inject ApiClient Api
+
+@if (Wishes.Count == 0 && !Editable)
+{
+    <div class="wi-card wi-card--green wi-card--media">
+        <img src="img/flocke-gift.svg" alt="" />
+        <div>
+            <h3 class="wi-card__title">Noch keine Wünsche</h3>
+            <p class="wi-card__text">@EmptyText</p>
+        </div>
+    </div>
+}
+else if (Wishes.Count > 0)
+{
+    <ul class="wi-list">
+        @foreach (var (wish, i) in Wishes.Select((w, i) => (w, i)))
+        {
+            @if (_editingId == wish.Id)
+            {
+                <li class="wi-item wi-item--form">
+                    <WishForm Initial="wish" SubmitLabel="Speichern" OnSubmit="input => SaveAsync(wish.Id, input)" OnCancel="() => _editingId = null" />
+                </li>
+            }
+            else
+            {
+                <li class="wi-item">
+                    <span class="wi-item__tile @(i % 2 == 1 ? "wi-item__tile--green" : "")"><Icon Name="gift" /></span>
+                    <div class="wi-item__body">
+                        <p class="wi-item__title">@wish.Title</p>
+                        <p class="wi-item__meta">
+                            @if (Host(wish.Url) is { } host)
+                            {
+                                <Icon Name="link" Small="true" /><a href="@wish.Url" target="_blank" rel="noopener noreferrer">@host</a>
+                            }
+                            else
+                            {
+                                <span>Kein Link</span>
+                            }
+                        </p>
+                    </div>
+                    <div class="wi-item__actions">
+                        @if (Editable && _confirmDeleteId == wish.Id)
+                        {
+                            <button class="wi-btn wi-btn--ghost" @onclick="() => _confirmDeleteId = null">Behalten</button>
+                            <button class="wi-btn wi-btn--danger" @onclick="() => DeleteAsync(wish.Id)">Löschen</button>
+                        }
+                        else if (Editable)
+                        {
+                            <button class="wi-btn wi-btn--ghost wi-btn--icon" aria-label="@($"{wish.Title} bearbeiten")" @onclick="() => { _editingId = wish.Id; _confirmDeleteId = null; }"><Icon Name="pencil" /></button>
+                            <button class="wi-btn wi-btn--ghost wi-btn--icon" aria-label="@($"{wish.Title} löschen")" @onclick="() => _confirmDeleteId = wish.Id"><Icon Name="trash" /></button>
+                        }
+                        else if (Host(wish.Url) is not null)
+                        {
+                            <a class="wi-btn wi-btn--ghost wi-btn--icon" href="@wish.Url" target="_blank" rel="noopener noreferrer" aria-label="@($"{wish.Title} öffnen")"><Icon Name="external" /></a>
+                        }
+                    </div>
+                </li>
+            }
+        }
+    </ul>
+}
+
+@if (_error is not null)
+{
+    <div class="wi-notice wi-notice--danger" role="alert"><Icon Name="alert" /><span>@_error</span></div>
+}
+
+@if (Editable)
+{
+    @if (_adding)
+    {
+        <div class="wi-card">
+            <WishForm SubmitLabel="Hinzufügen" OnSubmit="AddAsync" OnCancel="() => _adding = false" />
+        </div>
+    }
+    else
+    {
+        <button class="wi-btn wi-btn--secondary wi-btn--block" @onclick="() => { _adding = true; _editingId = null; }"><Icon Name="plus" />Wunsch hinzufügen</button>
+    }
+}
+
+@code {
+    [Parameter, EditorRequired] public List<WishDto> Wishes { get; set; } = [];
+    [Parameter] public bool Editable { get; set; }
+    [Parameter] public string EmptyText { get; set; } = "Hier ist noch nichts eingetragen.";
+    /// <summary>The API refused a change because the deadline passed.</summary>
+    [Parameter] public EventCallback Locked { get; set; }
+
+    private int? _editingId, _confirmDeleteId;
+    private bool _adding;
+    private string? _error;
+
+    private static string? Host(string? url) =>
+        Uri.TryCreate(url, UriKind.Absolute, out var u) ? u.Host.StartsWith("www.") ? u.Host[4..] : u.Host : null;
+
+    private async Task<string?> AddAsync(WishInput input) => await Run(async () =>
+    {
+        Wishes.Add(await Api.AddWishAsync(input));
+        _adding = false;
+    });
+
+    private async Task<string?> SaveAsync(int id, WishInput input) => await Run(async () =>
+    {
+        var saved = await Api.UpdateWishAsync(id, input);
+        Wishes[Wishes.FindIndex(w => w.Id == id)] = saved;
+        _editingId = null;
+    });
+
+    private async Task DeleteAsync(int id)
+    {
+        _error = await Run(async () =>
+        {
+            await Api.DeleteWishAsync(id);
+            Wishes.RemoveAll(w => w.Id == id);
+            _confirmDeleteId = null;
+        });
+    }
+
+    // Returns an error for the form to show, or null on success.
+    private async Task<string?> Run(Func<Task> action)
+    {
+        _error = null;
+        try { await action(); return null; }
+        catch (ApiException ex)
+        {
+            if (ex.Status == System.Net.HttpStatusCode.BadRequest && ex.Message.Contains("fest")) await Locked.InvokeAsync();
+            return ex.Message;
+        }
+        // The form calls us through a plain delegate, so re-render the list ourselves.
+        finally { StateHasChanged(); }
+    }
+}

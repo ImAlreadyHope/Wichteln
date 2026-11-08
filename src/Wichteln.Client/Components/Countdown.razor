@@ -1,0 +1,33 @@
+@implements IDisposable
+
+<div class="wi-lock__days" aria-label="@($"Noch {_left.Days} Tage, {_left.Hours} Stunden und {_left.Minutes} Minuten")">
+    <span class="wi-lock__unit"><span class="wi-lock__num">@_left.Days</span><span class="wi-lock__cap">@(_left.Days == 1 ? "Tag" : "Tage")</span></span>
+    <span class="wi-lock__unit"><span class="wi-lock__num">@_left.Hours.ToString("00")</span><span class="wi-lock__cap">Std</span></span>
+    <span class="wi-lock__unit"><span class="wi-lock__num">@_left.Minutes.ToString("00")</span><span class="wi-lock__cap">Min</span></span>
+    <span class="wi-lock__unit"><span class="wi-lock__num">@_left.Seconds.ToString("00")</span><span class="wi-lock__cap">Sek</span></span>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public DateTimeOffset Target { get; set; }
+    /// <summary>Server time minus this device's time, so a wrong phone clock doesn't matter.</summary>
+    [Parameter] public TimeSpan ClockOffset { get; set; }
+    [Parameter] public EventCallback Reached { get; set; }
+
+    private TimeSpan _left;
+    private Timer? _timer;
+    private bool _fired;
+
+    protected override void OnParametersSet()
+    {
+        Tick();
+        _timer ??= new Timer(_ => InvokeAsync(async () => { Tick(); StateHasChanged(); if (_left == TimeSpan.Zero && !_fired) { _fired = true; await Reached.InvokeAsync(); } }), null, 1000, 1000);
+    }
+
+    private void Tick()
+    {
+        var left = Target - (DateTimeOffset.UtcNow + ClockOffset);
+        _left = left < TimeSpan.Zero ? TimeSpan.Zero : left;
+    }
+
+    public void Dispose() => _timer?.Dispose();
+}

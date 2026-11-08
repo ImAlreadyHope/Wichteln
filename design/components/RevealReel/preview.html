@@ -1,0 +1,30 @@
+<!-- @dsCard group="Reveal" height=300 subtitle="slot-reel that lands on your Wichtel" -->
+<!doctype html>
+<html lang="de">
+<head><meta charset="utf-8"><title>preview</title>
+<style>html,body{margin:0} body{padding:16px} </style></head>
+<body class="wi-root">
+
+<div style="max-width:520px;margin:0 auto" class="wi-stack">
+  <div class="wi-reel" aria-live="polite"><span class="wi-reel__pointer"></span><div class="wi-reel__track" id="track"><div class="wi-reel__item"><span class="wi-avatar">J</span><span class="wi-reel__name">Justin</span></div><div class="wi-reel__item"><span class="wi-avatar wi-avatar--green">L</span><span class="wi-reel__name">Luana</span></div><div class="wi-reel__item is-active"><span class="wi-avatar">Ly</span><span class="wi-reel__name">Lydia</span></div><div class="wi-reel__item"><span class="wi-avatar wi-avatar--green">A</span><span class="wi-reel__name">Angelika</span></div><div class="wi-reel__item"><span class="wi-avatar">J</span><span class="wi-reel__name">Justin</span></div></div></div>
+  <button class="wi-btn wi-btn--outline" id="again" style="align-self:center"><svg class="wi-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8Z"/><path d="M19 15l.7 1.8 1.8.7-1.8.7L19 20l-.7-1.8-1.8-.7 1.8-.7Z"/></svg>Nochmal abspielen</button>
+</div>
+<script>
+(function(){
+  var track=document.getElementById('track'), items=[].slice.call(track.children), W=112+16;
+  function center(i){ return -(i*W + 56); }
+  function spin(){
+    var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    items.forEach(function(el){el.classList.remove('is-active')});
+    track.style.transition='none'; track.style.transform='translateX('+center(0)+'px)';
+    track.offsetWidth;
+    track.style.transition = reduce ? 'none' : 'transform 2.6s cubic-bezier(.12,.8,.18,1)';
+    track.style.transform='translateX('+center(2)+'px)';
+    setTimeout(function(){items[2].classList.add('is-active')}, reduce?0:2600);
+  }
+  document.getElementById('again').onclick=spin;
+  track.style.transform='translateX('+center(2)+'px)';
+})();
+</script>
+</body>
+</html>

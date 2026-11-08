@@ -1,0 +1,51 @@
+@inject IJSRuntime JS
+
+<div class="wi-reel" aria-hidden="true">
+    <span class="wi-reel__pointer"></span>
+    <div class="wi-reel__track" @ref="_track">
+        @foreach (var (p, i) in _items.Select((p, i) => (p, i)))
+        {
+            <div class="wi-reel__item @(_landed && i == _items.Count - 1 ? "is-active" : "")">
+                <Avatar Name="@p.Name" Id="p.Id" AllNames="AllNames" />
+                <span class="wi-reel__name">@p.Name</span>
+            </div>
+        }
+    </div>
+</div>
+<p class="wi-sr-only" aria-live="polite">@(_landed ? $"Dein Wichtel ist {Target.Name}." : "Flocke zieht deinen Wichtel …")</p>
+
+@code {
+    [Parameter, EditorRequired] public IReadOnlyList<PersonDto> People { get; set; } = [];
+    [Parameter, EditorRequired] public PersonDto Target { get; set; } = default!;
+    [Parameter] public IEnumerable<string>? AllNames { get; set; }
+    [Parameter] public EventCallback Landed { get; set; }
+
+    private ElementReference _track;
+    private List<PersonDto> _items = [];
+    private bool _landed, _started;
+
+    protected override void OnInitialized()
+    {
+        // Several shuffled rounds of everyone you could get, ending on the person you drew.
+        var rng = new Random();
+        for (var round = 0; round < 5; round++)
+        {
+            var batch = People.OrderBy(_ => rng.Next()).ToList();
+            if (_items.Count > 0 && batch[0].Id == _items[^1].Id) batch.Reverse();
+            _items.AddRange(batch);
+        }
+        if (_items[^1].Id == Target.Id) _items.RemoveAt(_items.Count - 1);
+        _items.Add(Target);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender || _started) return;
+        _started = true;
+        await JS.InvokeVoidAsync("wichteln.spin", _track, _items.Count - 1, 4200);
+        _landed = true;
+        StateHasChanged();
+        await Task.Delay(900);
+        await Landed.InvokeAsync();
+    }
+}

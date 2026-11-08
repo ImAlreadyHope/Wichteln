@@ -1,0 +1,47 @@
+# Apache / Plesk (Linux) hosting for the Blazor WebAssembly site.
+AddType application/wasm .wasm
+AddType application/octet-stream .dll .dat .blat .pdb
+AddType application/json .json
+AddType font/woff2 .woff2
+# .br is Brotli here, not the Breton language.
+RemoveLanguage .br
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  # Serve the pre-compressed Brotli files Blazor publishes, when the browser accepts them.
+  RewriteCond %{HTTP:Accept-Encoding} br
+  RewriteCond %{REQUEST_FILENAME}.br -f
+  RewriteRule ^(.*)$ $1.br [L]
+  # Single-page app: unknown paths fall back to index.html.
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule ^ index.html [L]
+</IfModule>
+
+<FilesMatch "\.(wasm|dll|dat|blat|js|json|css|pdb)\.br$">
+  # Already compressed: stop Apache from compressing it a second time.
+  SetEnv no-gzip 1
+  SetEnv no-brotli 1
+  Header set Content-Encoding br
+  Header append Vary Accept-Encoding
+</FilesMatch>
+<FilesMatch "\.wasm\.br$">
+  ForceType application/wasm
+</FilesMatch>
+<FilesMatch "\.(dll|dat|blat|pdb)\.br$">
+  ForceType application/octet-stream
+</FilesMatch>
+<FilesMatch "\.js\.br$">
+  ForceType text/javascript
+</FilesMatch>
+<FilesMatch "\.json\.br$">
+  ForceType application/json
+</FilesMatch>
+<FilesMatch "\.css\.br$">
+  ForceType text/css
+</FilesMatch>
+
+# Always fetch the newest app shell after a deploy.
+<FilesMatch "^(index\.html|blazor\.boot\.json|appsettings\.json)$">
+  Header set Cache-Control "no-cache"
+</FilesMatch>

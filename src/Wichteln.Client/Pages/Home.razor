@@ -1,0 +1,220 @@
+@page "/"
+@inject ApiClient Api
+@inject NavigationManager Nav
+@inject IJSRuntime JS
+
+<PageTitle>Wichteln</PageTitle>
+
+@switch (_state)
+{
+    case State.Loading:
+        <div class="wi-hero" aria-busy="true">
+            <img class="wi-hero__mascot wi-bob" src="img/flocke-hello.svg" alt="" />
+            <p class="wi-muted">Flocke sucht deine Liste …</p>
+        </div>
+        break;
+
+    case State.NoLink:
+        <div class="wi-hero">
+            <img class="wi-hero__mascot" src="img/flocke-hello.svg" alt="Flocke, die weiße Perserkatze, winkt" />
+            <h1 class="wi-hero__title">Frohes Wichteln!</h1>
+            <p class="wi-hero__text">Öffne den persönlichen Link, den du bekommen hast. Damit landest du direkt bei deiner Wunschliste.</p>
+            @if (_error is not null)
+            {
+                <div class="wi-notice wi-notice--danger" role="alert"><Icon Name="alert" /><span>@_error</span></div>
+            }
+        </div>
+        break;
+
+    case State.Error:
+        <div class="wi-hero">
+            <img class="wi-hero__mascot" src="img/flocke-sleep.svg" alt="" />
+            <h1 class="wi-hero__title">Kurz eingenickt</h1>
+            <div class="wi-notice wi-notice--danger" role="alert"><Icon Name="alert" /><span>@_error</span></div>
+            <button class="wi-btn wi-btn--outline" @onclick="LoadAsync">Nochmal versuchen</button>
+        </div>
+        break;
+
+    default:
+        <header class="wi-appbar">
+            <Avatar Name="@_me!.Name" Id="_me.Id" AllNames="AllNames" />
+            <div class="wi-appbar__text">
+                <p class="wi-appbar__hello">Hallo,</p>
+                <h1 class="wi-appbar__name">@_me.Name</h1>
+            </div>
+            @if (_state == State.Revealed)
+            {
+                <span class="wi-badge wi-badge--green"><Icon Name="check" Small="true" />Gezogen</span>
+            }
+            else if (!_me.IsUnlocked)
+            {
+                <span class="wi-badge"><span class="wi-badge__dot"></span>@DaysLeftLabel</span>
+            }
+        </header>
+
+        @if (_state == State.Revealed && _wichtel is not null)
+        {
+            <section class="wi-card wi-card--red wi-result" aria-labelledby="result-title">
+                <img class="wi-result__mascot" src="img/flocke-wink.svg" alt="" />
+                <p class="wi-result__eyebrow">Dein Wichtel ist</p>
+                <div class="wi-result__avatar" @ref="_burstHost">
+                    <Avatar Name="@_wichtel.Person.Name" Id="_wichtel.Person.Id" Size="xl" AllNames="AllNames" />
+                </div>
+                <h2 id="result-title" class="wi-result__name">@_wichtel.Person.Name</h2>
+                <p class="wi-card__text">Psst, nicht verraten! Hier ist @(_wichtel.Person.Name)s Wunschliste.</p>
+            </section>
+            <section class="wi-section" aria-labelledby="their-list">
+                <h2 id="their-list" class="wi-section__title">@(_wichtel.Person.Name)s Wünsche</h2>
+                <WishList Wishes="_wichtel.Wishes.ToList()" EmptyText="@($"{_wichtel.Person.Name} hat sich nichts gewünscht. Zeit für deine eigene Idee!")" />
+            </section>
+        }
+        else if (_state == State.Spinning && _wichtel is not null)
+        {
+            <section class="wi-card wi-card--red wi-reveal">
+                <h2 class="wi-card__title">Flocke zieht deinen Wichtel …</h2>
+                <RevealReel People="_me.Others" Target="_wichtel.Person" AllNames="AllNames" Landed="OnLandedAsync" />
+            </section>
+        }
+        else
+        {
+            <section class="wi-card wi-card--red">
+                <div class="wi-lock">
+                    @if (_me.IsUnlocked)
+                    {
+                        <img class="wi-lock__mascot" src="img/flocke-gift.svg" alt="Flocke hält ein Geschenk" />
+                        <h2 class="wi-card__title">Es ist so weit!</h2>
+                        <p class="wi-card__text">Finde heraus, wen du dieses Jahr beschenkst.</p>
+                        @if (_error is not null)
+                        {
+                            <div class="wi-notice wi-notice--danger" role="alert"><Icon Name="alert" /><span>@_error</span></div>
+                        }
+                        <button class="wi-btn wi-btn--primary wi-btn--lg wi-btn--block" disabled="@_busy" @onclick="RevealAsync"><Icon Name="sparkles" />Zeige meinen Wichtel</button>
+                    }
+                    else
+                    {
+                        <img class="wi-lock__mascot" src="img/flocke-sleep.svg" alt="Flocke schläft" />
+                        <h2 class="wi-card__title">Flocke schläft noch</h2>
+                        <p class="wi-card__text">Am @_me.UnlockAt.ToOffset(TimeSpan.FromHours(1)).ToString("d. MMMM", German) erfährst du, wen du beschenkst.</p>
+                        <Countdown Target="_me.UnlockAt" ClockOffset="_clockOffset" Reached="LoadAsync" />
+                        <button class="wi-btn wi-btn--primary wi-btn--lg wi-btn--block" disabled><Icon Name="lock" />Zeige meinen Wichtel</button>
+                    }
+                </div>
+            </section>
+
+            <section class="wi-section" aria-labelledby="my-list">
+                <div class="wi-section__head">
+                    <h2 id="my-list" class="wi-section__title">Meine Wunschliste</h2>
+                    <span class="wi-badge">@_myWishes.Count @(_myWishes.Count == 1 ? "Wunsch" : "Wünsche")</span>
+                </div>
+                @if (_me.IsUnlocked)
+                {
+                    <div class="wi-notice"><Icon Name="lock" /><span>Die Wunschlisten sind seit der Ziehung fest.</span></div>
+                }
+                else
+                {
+                    <div class="wi-notice"><Icon Name="calendar" /><span>Du kannst deine Liste bis zum @_me.UnlockAt.ToOffset(TimeSpan.FromHours(1)).AddMinutes(-1).ToString("d. MMMM", German) ändern.</span></div>
+                }
+                <WishList Wishes="_myWishes" Editable="!_me.IsUnlocked" Locked="LoadAsync"
+                          EmptyText="Du hast nichts eingetragen." />
+            </section>
+        }
+        break;
+}
+
+@code {
+    private enum State { Loading, NoLink, Error, Ready, Spinning, Revealed }
+    private static readonly System.Globalization.CultureInfo German = new("de-DE");
+
+    private State _state = State.Loading;
+    private MeDto? _me;
+    private List<WishDto> _myWishes = [];
+    private WichtelDto? _wichtel;
+    private string? _error;
+    private bool _busy;
+    private TimeSpan _clockOffset;
+    private ElementReference _burstHost;
+    private bool _burstPending;
+
+    [SupplyParameterFromQuery(Name = "login")] public string? LoginToken { get; set; }
+
+    private IEnumerable<string> AllNames => _me is null ? [] : _me.Others.Select(o => o.Name).Append(_me.Name);
+
+    private string DaysLeftLabel
+    {
+        get
+        {
+            var days = (int)Math.Floor((_me!.UnlockAt - (DateTimeOffset.UtcNow + _clockOffset)).TotalDays);
+            return days switch { <= 0 => "Heute", 1 => "Noch 1 Tag", _ => $"Noch {days} Tage" };
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!string.IsNullOrWhiteSpace(LoginToken))
+        {
+            await Api.SetTokenAsync(LoginToken.Trim());
+            await JS.InvokeVoidAsync("wichteln.cleanUrl");
+        }
+        await LoadAsync();
+    }
+
+    private async Task LoadAsync()
+    {
+        _error = null;
+        if (await Api.GetTokenAsync() is null) { _state = State.NoLink; return; }
+        try
+        {
+            _me = await Api.GetMeAsync();
+            _clockOffset = _me.ServerNow - DateTimeOffset.UtcNow;
+            _myWishes = _me.Wishes.ToList();
+            if (_me.HasRevealed)
+            {
+                _wichtel = await Api.GetWichtelAsync();
+                _state = State.Revealed;
+            }
+            else _state = State.Ready;
+        }
+        catch (ApiException ex) when (ex.Status == System.Net.HttpStatusCode.Unauthorized)
+        {
+            await Api.ClearTokenAsync();
+            _error = ex.Message;
+            _state = State.NoLink;
+        }
+        catch (ApiException ex)
+        {
+            _error = ex.Message;
+            _state = State.Error;
+        }
+        StateHasChanged();
+    }
+
+    private async Task RevealAsync()
+    {
+        _busy = true;
+        _error = null;
+        try
+        {
+            _wichtel = await Api.RevealAsync();
+            _state = State.Spinning;
+        }
+        catch (ApiException ex) { _error = ex.Message; }
+        finally { _busy = false; }
+    }
+
+    private Task OnLandedAsync()
+    {
+        _state = State.Revealed;
+        _burstPending = true;
+        StateHasChanged();
+        return Task.CompletedTask;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (_burstPending && _state == State.Revealed)
+        {
+            _burstPending = false;
+            await JS.InvokeVoidAsync("wichteln.burst", _burstHost);
+        }
+    }
+}

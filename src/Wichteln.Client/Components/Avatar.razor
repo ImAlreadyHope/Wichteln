@@ -1,0 +1,34 @@
+@inject Microsoft.Extensions.Configuration.IConfiguration Config
+@* Initial on a red or green well; a photo from img/people/<name>.jpg covers it when listed in appsettings.json "Photos". *@
+<span class="wi-avatar @SizeClass @(Id % 2 == 0 ? "wi-avatar--green" : "")" role="img" aria-label="@Name">
+    <span aria-hidden="true">@Initials</span>
+    @if (HasPhoto)
+    {
+        <img src="img/people/@(Name.ToLowerInvariant()).jpg" alt="" onerror="this.remove()" />
+    }
+</span>
+
+@code {
+    [Parameter, EditorRequired] public string Name { get; set; } = "";
+    [Parameter] public int Id { get; set; }
+    [Parameter] public string Size { get; set; } = "md";
+    /// <summary>All names in the group, so two people with the same first letter get two letters.</summary>
+    [Parameter] public IEnumerable<string>? AllNames { get; set; }
+
+    private bool HasPhoto => Config.GetSection("Photos").Get<string[]>()?.Contains(Name, StringComparer.OrdinalIgnoreCase) == true;
+
+    private string SizeClass => Size switch { "sm" => "wi-avatar--sm", "lg" => "wi-avatar--lg", "xl" => "wi-avatar--xl", _ => "" };
+
+    private string Initials
+    {
+        get
+        {
+            if (string.IsNullOrEmpty(Name)) return "?";
+            var clash = AllNames?.Any(n => n != Name && n.Length > 0 && char.ToUpperInvariant(n[0]) == char.ToUpperInvariant(Name[0])) == true;
+            // The later name alphabetically takes two letters (Luana "L", Lydia "Ly").
+            var takesTwo = clash && AllNames!.Where(n => n.Length > 0 && char.ToUpperInvariant(n[0]) == char.ToUpperInvariant(Name[0]))
+                .OrderBy(n => n, StringComparer.OrdinalIgnoreCase).First() != Name;
+            return takesTwo && Name.Length > 1 ? Name[..2] : Name[..1].ToUpperInvariant();
+        }
+    }
+}

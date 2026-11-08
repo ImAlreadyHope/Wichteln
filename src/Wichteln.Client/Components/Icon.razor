@@ -1,0 +1,7 @@
+<svg class="wi-icon @(Small ? "wi-icon--sm" : "") @Class" viewBox="0 0 24 24" aria-hidden="true">@((MarkupString)(Icons.Paths.TryGetValue(Name, out var p) ? p : ""))</svg>
+
+@code {
+    [Parameter, EditorRequired] public string Name { get; set; } = "";
+    [Parameter] public bool Small { get; set; }
+    [Parameter] public string? Class { get; set; }
+}

@@ -1,0 +1,38 @@
+# Wichteln API behind Caddy (automatic HTTPS). Lives on the IONOS VPS.
+# Usage: cp .env.example .env, fill it in, then: docker compose up -d --build
+services:
+  api:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    restart: unless-stopped
+    environment:
+      ConnectionStrings__Wichteln: ${MYSQL_CONNECTION}
+      Db__Provider: mysql
+      Db__ServerVersion: ${MYSQL_SERVER_VERSION:-}
+      Wichteln__PublicAppUrl: ${APP_URL}
+      Wichteln__AllowedOrigins__0: ${APP_URL}
+      Wichteln__AdminKey: ${ADMIN_KEY}
+      Wichteln__UnlockAt: ${UNLOCK_AT:-2026-11-20T00:00:00+01:00}
+    expose:
+      - "8080"
+
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    environment:
+      API_DOMAIN: ${API_DOMAIN}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - api
+
+volumes:
+  caddy_data:
+  caddy_config:
