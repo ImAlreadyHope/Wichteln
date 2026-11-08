@@ -25,7 +25,7 @@ Wichteln is a small Christmas gift-exchange app for one family: Justin, Luana, L
 
 ## Shape, space and depth
 
-- Corners are soft, never sharp: `radius-md` (14px) for buttons and inputs, `radius-lg` (20px) for cards and lists, `radius-xl` (28px) for the reveal stage and sheets, `radius-full` for avatars and badges.
+- Corners are soft, never sharp: `radius-md` (14px) for buttons and inputs, `radius-lg` (20px) for cards and lists, `radius-xl` (28px) for the reveal stage and sheets, `radius-lg` (20px) for avatars, `radius-full` for badges.
 - Spacing runs on a 4px base: `space-4` card padding and phone gutter, `space-6` between cards, `space-8` between sections.
 - Depth is quiet: one `shadow-card` on raised cards, `shadow-pop` only on the revealed avatar. No bevels, no thick bottom borders, no gradients on controls.
 - Layout is a single centred column, max 480px, like a phone app, on every screen size.
