@@ -4,7 +4,7 @@ A small Christmas gift-exchange (Wichteln) app for Justin, Luana, Lydia, Angelik
 
 - **Login by personal link.** Each person gets a link like `https://wichteln.devilbots.dev/?login=…`. No passwords.
 - **Wishlists.** Everyone can add, edit and delete their own wishes (with an optional link) until the unlock date.
-- **The draw.** From **20 November 2026, 00:00 (German time)** the "Zeige meinen Wichtel" button unlocks. Flocke spins a reel through the others' avatars and lands on your Wichtel. After that you only see that person and their wishlist.
+- **The draw.** From **20 November 2026, 00:00 (German time)** the "Zeige meinen Wichtel" button unlocks. Kitti spins a reel through the others' avatars and lands on your Wichtel. After that you only see that person and their wishlist.
 - **Rules.** Nobody draws themselves, every person is drawn exactly once (also enforced by a unique key in the database), and Justin ↔ Luana and Angelika ↔ Denis can never draw each other. The server draws once for everyone on the first reveal, picking uniformly among all valid combinations.
 
 ## Projects
@@ -16,7 +16,7 @@ A small Christmas gift-exchange (Wichteln) app for Justin, Luana, Lydia, Angelik
 | `src/Wichteln.Shared` | DTOs and wish validation shared by both |
 | `tests/Wichteln.Tests` | Draw-rule tests and API tests (wishlist freeze, reveal, uniqueness) |
 | `deploy/` | Dockerfile, docker-compose, Caddy site block, `deploy.sh`, `.env.example` |
-| `design/` | The design system: tokens, components CSS, Flocke mascot and icons |
+| `design/` | The design system: tokens, components CSS, Kitti mascot and icons |
 
 ## Run locally
 
