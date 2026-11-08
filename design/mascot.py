@@ -1,10 +1,15 @@
 # Regenerates the mascot SVGs: python3 design/mascot.py design/assets/Mascot
-"""Generates the original 'Flocke' mascot: a white Persian cat, kawaii cartoon style."""
+"""Generates the original 'Flocke' mascot: a Siamese cat, kawaii cartoon style."""
 import math, os, sys
 
 INK = "#3A2A30"
 WHITE = "#FFFFFF"
-SHADE = "#F3E9EE"      # soft fur shade
+SHADE = "#EFE2D2"      # soft fur shade
+FUR = "#FBF3E8"        # Siamese cream coat
+POINT = "#6B4A3A"      # seal-brown points: ears, mask, paws, tail
+MASK = "#9C7560"       # lighter point tone for the face mask
+IRIS = "#4A90D9"       # Siamese blue eyes
+IRIS_D = "#2F6CB0"
 PINK = "#F4A6BD"
 PINK_D = "#E57D9C"
 GREEN = "#1F6B45"
@@ -45,17 +50,17 @@ def shape(s, fill, grow):
     return f'<circle cx="{cx:.1f}" cy="{cy:.1f}" r="{r+grow:.1f}" fill="{fill}"/>'
 
 def ear(side):
-    # side -1 left, +1 right ; rounded triangle set low and wide (Persian)
+    # side -1 left, +1 right ; tall rounded triangle with dark Siamese points
     x0 = 120 + side * 44
-    tip = (120 + side * 70, 34)
-    a = (120 + side * 22, 62)
-    b = (120 + side * 82, 80)
+    tip = (120 + side * 74, 22)
+    a = (120 + side * 20, 60)
+    b = (120 + side * 84, 84)
     d = f"M{a[0]},{a[1]} Q{tip[0]-side*14},{tip[1]-6} {tip[0]},{tip[1]} Q{tip[0]+side*8},{tip[1]+4} {b[0]},{b[1]} Z"
-    inner_a = (120 + side * 34, 64)
-    inner_tip = (120 + side * 66, 46)
-    inner_b = (120 + side * 72, 76)
+    inner_a = (120 + side * 34, 62)
+    inner_tip = (120 + side * 69, 36)
+    inner_b = (120 + side * 74, 76)
     di = f"M{inner_a[0]},{inner_a[1]} Q{inner_tip[0]-side*10},{inner_tip[1]-2} {inner_tip[0]},{inner_tip[1]} Q{inner_tip[0]+side*4},{inner_tip[1]+6} {inner_b[0]},{inner_b[1]} Z"
-    return (f'<path d="{d}" fill="{WHITE}" stroke="{INK}" stroke-width="{OW}" stroke-linejoin="round"/>'
+    return (f'<path d="{d}" fill="{POINT}" stroke="{INK}" stroke-width="{OW}" stroke-linejoin="round"/>'
             f'<path d="{di}" fill="{PINK}"/>')
 
 def eyes(mode):
@@ -67,24 +72,28 @@ def eyes(mode):
         elif mode == "wink" and side == 1:
             s.append(f'<path d="M{cx-13},{cy+4} Q{cx},{cy-8} {cx+13},{cy+4}" fill="none" stroke="{INK}" stroke-width="4.5" stroke-linecap="round"/>')
         else:
-            s.append(f'<ellipse cx="{cx}" cy="{cy}" rx="17" ry="20" fill="{EYE}"/>')
-            s.append(f'<ellipse cx="{cx}" cy="{cy+8}" rx="10" ry="6" fill="#5B4250"/>')
+            s.append(f'<ellipse cx="{cx}" cy="{cy}" rx="17" ry="20" fill="{IRIS_D}" stroke="{INK}" stroke-width="2.5"/>')
+            s.append(f'<ellipse cx="{cx}" cy="{cy+4}" rx="13" ry="14" fill="{IRIS}"/>')
+            s.append(f'<ellipse cx="{cx}" cy="{cy+1}" rx="8" ry="11" fill="{EYE}"/>')
             s.append(f'<circle cx="{cx-5}" cy="{cy-7}" r="6" fill="{WHITE}"/>')
             s.append(f'<circle cx="{cx+6}" cy="{cy+6}" r="2.6" fill="{WHITE}"/>')
     return "\n".join(s)
 
 def face(mode):
-    s = [eyes(mode)]
+    # Siamese mask: darker muzzle and a soft band between the eyes
+    s = [f'<ellipse cx="120" cy="124" rx="34" ry="24" fill="{MASK}"/>',
+         f'<path d="M104,84 Q120,76 136,84 L130,108 Q120,112 110,108 Z" fill="{MASK}" opacity=".55"/>',
+         eyes(mode)]
     # blush
     for side in (-1, 1):
-        s.append(f'<ellipse cx="{120+side*50}" cy="{124}" rx="11" ry="6.5" fill="{PINK}" opacity=".75"/>')
+        s.append(f'<ellipse cx="{120+side*56}" cy="{126}" rx="10" ry="6" fill="{PINK}" opacity=".8"/>')
         # whisker freckles
         for k in range(3):
-            s.append(f'<circle cx="{120+side*(54+k*6)}" cy="{112+(k%2)*3}" r="1.4" fill="{INK}" opacity=".35"/>')
+            s.append(f'<circle cx="{120+side*(22+k*5)}" cy="{122+(k%2)*3}" r="1.4" fill="{FUR}" opacity=".7"/>')
     # nose
-    s.append(f'<path d="M113,118 Q120,114 127,118 Q124,125 120,126 Q116,125 113,118 Z" fill="{PINK_D}" stroke="{INK}" stroke-width="2" stroke-linejoin="round"/>')
+    s.append(f'<path d="M113,118 Q120,114 127,118 Q124,125 120,126 Q116,125 113,118 Z" fill="{INK}" stroke="{INK}" stroke-width="2" stroke-linejoin="round"/>')
     if mode == "sleep":
-        s.append(f'<path d="M112,131 Q116,135 120,131 Q124,135 128,131" fill="none" stroke="{INK}" stroke-width="3" stroke-linecap="round"/>')
+        s.append(f'<path d="M112,131 Q116,135 120,131 Q124,135 128,131" fill="none" stroke="{FUR}" stroke-width="3" stroke-linecap="round"/>')
     else:
         # open grin with tongue and a tiny fang
         s.append(f'<path d="M108,130 Q120,152 132,130 Q126,134 120,129 Q114,134 108,130 Z" fill="#7A3B4F" stroke="{INK}" stroke-width="2.6" stroke-linejoin="round"/>')
@@ -117,12 +126,11 @@ def scarf():
 
 def body_parts(pose):
     out = []
-    # tail: fluffy curve on the right, behind body
-    tail = [(176 + 30 * math.sin(t / 10 * 2.2), 214 - t * 7.5, 13 - t * 0.2) for t in range(11)]
-    out.append(blob([], tail, WHITE))
+    # tail: slim dark curve on the right, behind body
+    tail = [(176 + 30 * math.sin(t / 10 * 2.2), 214 - t * 7.5, 8 - t * 0.1) for t in range(11)]
+    out.append(blob([], tail, POINT))
     # body
-    body_bumps = fluff(120, 186, 58, 44, 18, 13, 150, 390)
-    out.append(blob([("ellipse", 120, 188, 60, 46)], body_bumps, WHITE))
+    out.append(blob([("ellipse", 120, 190, 58, 46)], [], FUR))
     out.append(f'<ellipse cx="120" cy="200" rx="34" ry="24" fill="{SHADE}"/>')
     return "\n".join(out)
 
@@ -130,20 +138,20 @@ def paws(pose):
     out = []
     feet = [(96, 230), (144, 230)]
     for (x, y) in feet:
-        out.append(f'<ellipse cx="{x}" cy="{y}" rx="17" ry="11" fill="{WHITE}" stroke="{INK}" stroke-width="{OW}"/>')
-        out.append(f'<path d="M{x-5},{y-5} v7 M{x+5},{y-5} v7" stroke="{INK}" stroke-width="2.4" stroke-linecap="round"/>')
+        out.append(f'<ellipse cx="{x}" cy="{y}" rx="17" ry="11" fill="{POINT}" stroke="{INK}" stroke-width="{OW}"/>')
+        out.append(f'<path d="M{x-5},{y-5} v7 M{x+5},{y-5} v7" stroke="{FUR}" stroke-width="2.4" stroke-linecap="round"/>')
     if pose == "gift":
         out.append(gift(120, 196))
         for x in (84, 156):
-            out.append(f'<ellipse cx="{x}" cy="190" rx="13" ry="11" fill="{WHITE}" stroke="{INK}" stroke-width="{OW}"/>')
+            out.append(f'<ellipse cx="{x}" cy="190" rx="13" ry="11" fill="{POINT}" stroke="{INK}" stroke-width="{OW}"/>')
     elif pose == "hello":
-        out.append(f'<ellipse cx="96" cy="196" rx="13" ry="11" fill="{WHITE}" stroke="{INK}" stroke-width="{OW}"/>')
-        out.append(f'<g transform="rotate(-28 192 140)"><ellipse cx="192" cy="140" rx="14" ry="19" fill="{WHITE}" stroke="{INK}" stroke-width="{OW}"/>'
+        out.append(f'<ellipse cx="96" cy="196" rx="13" ry="11" fill="{POINT}" stroke="{INK}" stroke-width="{OW}"/>')
+        out.append(f'<g transform="rotate(-28 192 140)"><ellipse cx="192" cy="140" rx="14" ry="19" fill="{POINT}" stroke="{INK}" stroke-width="{OW}"/>'
                    f'<ellipse cx="192" cy="136" rx="6" ry="5" fill="{PINK}"/>'
                    f'<circle cx="184" cy="127" r="3" fill="{PINK}"/><circle cx="192" cy="124" r="3" fill="{PINK}"/><circle cx="200" cy="127" r="3" fill="{PINK}"/></g>')
     else:  # sleep: paws tucked
         for x in (98, 142):
-            out.append(f'<ellipse cx="{x}" cy="196" rx="13" ry="10" fill="{WHITE}" stroke="{INK}" stroke-width="{OW}"/>')
+            out.append(f'<ellipse cx="{x}" cy="196" rx="13" ry="10" fill="{POINT}" stroke="{INK}" stroke-width="{OW}"/>')
     return "\n".join(out)
 
 def gift(cx, cy):
@@ -156,10 +164,9 @@ def gift(cx, cy):
             f'<circle cx="{cx}" cy="{y-6}" r="5" fill="{RED_D}" stroke="{INK}" stroke-width="3"/>')
 
 def head():
-    bumps = fluff(120, 104, 70, 56, 22, 13, 0, 360)
-    # extra cheek fluff tufts
-    bumps += [(46, 118, 12), (194, 118, 12), (52, 136, 10), (188, 136, 10)]
-    return blob([("ellipse", 120, 104, 74, 58)], bumps, WHITE)
+    # sleek short coat: just two small cheek tufts
+    bumps = [(52, 124, 9), (188, 124, 9), (60, 138, 7), (180, 138, 7)]
+    return blob([("ellipse", 120, 104, 76, 60)], bumps, FUR)
 
 def zzz():
     return (f'<text x="190" y="54" font-family="Fredoka, sans-serif" font-weight="600" font-size="26" fill="{INK}" opacity=".55">z</text>'
@@ -176,7 +183,7 @@ def cat(pose="hello", mode=None, with_hat=True):
         parts.append(zzz())
     inner = "\n".join(parts)
     return (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -14 256 262" width="256" height="262" role="img" '
-            f'aria-label="Flocke, a white Persian cat">\n<title>Flocke</title>\n{inner}\n</svg>\n')
+            f'aria-label="Flocke, a Siamese cat">\n<title>Flocke</title>\n{inner}\n</svg>\n')
 
 if __name__ == "__main__":
     out = sys.argv[1]

@@ -1,4 +1,4 @@
-Wichteln is a small Christmas gift-exchange app for one family: Justin, Luana, Lydia, Angelika and Denis. Each person opens a personal link, writes a wishlist, and on 20 November reveals whom they give a present to. The look is clean and calm like an Apple settings screen, warmed by Christmas red, pine green and a touch of gold, and by Flocke, the white Persian cat who guides every screen.
+Wichteln is a small Christmas gift-exchange app for one family: Justin, Luana, Lydia, Angelika and Denis. Each person opens a personal link, writes a wishlist, and on 20 November reveals whom they give a present to. The look is clean and calm like an Apple settings screen, warmed by Christmas red, pine green and a touch of gold, and by Flocke, the Siamese cat who guides every screen.
 
 ## Voice and copy
 
@@ -32,7 +32,7 @@ Wichteln is a small Christmas gift-exchange app for one family: Justin, Luana, L
 
 ## Flocke, the mascot
 
-Flocke is an original white Persian cat: a round fluffy head, small low ears, huge glossy dark eyes, a little fang in a cheeky grin, a red Santa hat and a pine-green scarf. Four poses live in **Mascot**:
+Flocke is an original Siamese cat: a round head with a cream coat and seal-brown points on the ears, face mask, paws and tail, big pointed ears, huge glossy blue eyes, a little fang in a cheeky grin, a red Santa hat and a pine-green scarf. Four poses live in **Mascot**:
 
 - `flocke-hello.svg`: login and welcome screens.
 - `flocke-sleep.svg`: the locked reveal before 20 November.
