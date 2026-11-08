@@ -1,0 +1,13 @@
+# Site block for the shared Caddy on the VPS (/opt/apps/caddy/Caddyfile).
+# API only: the Blazor client lives on Plesk at wichteln.devilbots.dev; the app checks CORS and the login tokens.
+wichteln-api.devilbots.dev {
+    encode zstd gzip
+
+    reverse_proxy wichteln-api:8080
+
+    header {
+        Strict-Transport-Security "max-age=31536000"
+        X-Content-Type-Options "nosniff"
+        -Server
+    }
+}

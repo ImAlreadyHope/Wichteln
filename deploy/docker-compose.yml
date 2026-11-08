@@ -1,38 +1,29 @@
-# Wichteln API behind Caddy (automatic HTTPS). Lives on the IONOS VPS.
-# Usage: cp .env.example .env, fill it in, then: docker compose up -d --build
+# Wichteln API on the IONOS VPS: /opt/apps/wichteln/deploy/docker-compose.yml
+# Joins the shared "edge" network; the shared Caddy (/opt/apps/caddy) serves it over HTTPS (site block: Caddyfile.site).
+# The database is the hosted MariaDB on devilbots.dev. The Blazor client is hosted on Plesk (wichteln.devilbots.dev).
+# Secrets come from .env next to this file (see .env.example).
+#   docker compose up -d --build
+name: wichteln
+
 services:
-  api:
+  wichteln-api:
     build:
       context: ..
       dockerfile: deploy/Dockerfile
+    image: wichteln:latest
+    container_name: wichteln-api
     restart: unless-stopped
     environment:
-      ConnectionStrings__Wichteln: ${MYSQL_CONNECTION}
+      ConnectionStrings__Wichteln: ${MYSQL_CONNECTION:?Set MYSQL_CONNECTION in .env}
       Db__Provider: mysql
       Db__ServerVersion: ${MYSQL_SERVER_VERSION:-}
-      Wichteln__PublicAppUrl: ${APP_URL}
-      Wichteln__AllowedOrigins__0: ${APP_URL}
-      Wichteln__AdminKey: ${ADMIN_KEY}
+      Wichteln__PublicAppUrl: ${APP_URL:-https://wichteln.devilbots.dev}
+      Wichteln__AllowedOrigins__0: ${APP_URL:-https://wichteln.devilbots.dev}
+      Wichteln__AdminKey: ${ADMIN_KEY:?Set ADMIN_KEY in .env}
       Wichteln__UnlockAt: ${UNLOCK_AT:-2026-11-20T00:00:00+01:00}
-    expose:
-      - "8080"
+    networks:
+      - edge   # reachable only through the shared Caddy, as wichteln-api:8080
 
-  caddy:
-    image: caddy:2
-    restart: unless-stopped
-    ports:
-      - "80:80"
-      - "443:443"
-      - "443:443/udp"
-    environment:
-      API_DOMAIN: ${API_DOMAIN}
-    volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile:ro
-      - caddy_data:/data
-      - caddy_config:/config
-    depends_on:
-      - api
-
-volumes:
-  caddy_data:
-  caddy_config:
+networks:
+  edge:
+    external: true

@@ -1,0 +1,99 @@
+# Deploys main after CI passed: the API to the IONOS VPS (deploy/deploy.sh over SSH), then the Blazor client
+# to Plesk over FTPS. Needs the repository secrets listed in README.md ("Automatic deploys"); without them it skips.
+name: Deploy
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+jobs:
+  check:
+    name: Secrets set?
+    if: github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push')
+    runs-on: ubuntu-latest
+    outputs:
+      api: ${{ steps.s.outputs.api }}
+      client: ${{ steps.s.outputs.client }}
+    steps:
+      - id: s
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+          FTP_SERVER: ${{ secrets.PLESK_FTP_SERVER }}
+          FTP_USER: ${{ secrets.PLESK_FTP_USER }}
+        run: |
+          api=false; client=false
+          if [ -n "$VPS_HOST" ] && [ -n "$VPS_SSH_KEY" ]; then api=true; else echo "::notice::VPS_HOST / VPS_SSH_KEY not set, skipping the API deploy"; fi
+          if [ -n "$FTP_SERVER" ] && [ -n "$FTP_USER" ]; then client=true; else echo "::notice::PLESK_FTP_* not set, skipping the client deploy"; fi
+          echo "api=$api" >> "$GITHUB_OUTPUT"; echo "client=$client" >> "$GITHUB_OUTPUT"
+
+  api:
+    name: API to the VPS
+    needs: check
+    if: needs.check.outputs.api == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+
+      - name: SSH key
+        env:
+          VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+          VPS_KNOWN_HOSTS: ${{ secrets.VPS_KNOWN_HOSTS }}
+        run: |
+          mkdir -p ~/.ssh && chmod 700 ~/.ssh
+          printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/wichteln_deploy && chmod 600 ~/.ssh/wichteln_deploy
+          if [ -n "$VPS_KNOWN_HOSTS" ]; then printf '%s\n' "$VPS_KNOWN_HOSTS" > ~/.ssh/known_hosts; fi
+
+      - name: Upload, build and restart
+        run: WICHTELN_SSH_KEY="$HOME/.ssh/wichteln_deploy" bash deploy/deploy.sh "${{ secrets.VPS_HOST }}"
+
+      - name: API answers
+        run: |
+          for i in $(seq 1 20); do
+            if curl -fsS https://wichteln-api.devilbots.dev/health; then echo; exit 0; fi
+            sleep 3
+          done
+          echo "API did not answer /health"; exit 1
+
+  client:
+    name: Client to Plesk
+    needs: [check, api]
+    if: always() && needs.check.outputs.client == 'true' && needs.api.result != 'failure'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - run: dotnet publish src/Wichteln.Client -c Release -o publish/client
+
+      - run: rm -f publish/client/wwwroot/appsettings.Development.json*
+
+      - uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.PLESK_FTP_SERVER }}
+          username: ${{ secrets.PLESK_FTP_USER }}
+          password: ${{ secrets.PLESK_FTP_PASSWORD }}
+          protocol: ftps
+          local-dir: publish/client/wwwroot/
+          server-dir: ${{ vars.PLESK_FTP_DIR || './' }}

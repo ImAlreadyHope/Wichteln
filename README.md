@@ -2,7 +2,7 @@
 
 A small Christmas gift-exchange (Wichteln) app for Justin, Luana, Lydia, Angelika and Denis.
 
-- **Login by personal link.** Each person gets a link like `https://wichteln.example.de/?login=…`. No passwords.
+- **Login by personal link.** Each person gets a link like `https://wichteln.devilbots.dev/?login=…`. No passwords.
 - **Wishlists.** Everyone can add, edit and delete their own wishes (with an optional link) until the unlock date.
 - **The draw.** From **20 November 2026, 00:00 (German time)** the "Zeige meinen Wichtel" button unlocks. Kitti spins a reel through the others' avatars and lands on your Wichtel. After that you only see that person and their wishlist.
 - **Rules.** Nobody draws themselves, every person is drawn exactly once (also enforced by a unique key in the database), and Justin ↔ Luana and Angelika ↔ Denis can never draw each other. The server draws once for everyone on the first reveal, picking uniformly among all valid combinations.
@@ -12,10 +12,10 @@ A small Christmas gift-exchange (Wichteln) app for Justin, Luana, Lydia, Angelik
 | Folder | What |
 | --- | --- |
 | `src/Wichteln.Client` | Blazor WebAssembly site (static files, hosted on Cybrancee/Plesk) |
-| `src/Wichteln.Api` | ASP.NET Core 8 minimal API with EF Core + MySQL (Docker on the IONOS VPS behind Caddy) |
+| `src/Wichteln.Api` | ASP.NET Core 8 minimal API with EF Core + MySQL (Docker on the IONOS VPS behind the shared Caddy) |
 | `src/Wichteln.Shared` | DTOs and wish validation shared by both |
 | `tests/Wichteln.Tests` | Draw-rule tests and API tests (wishlist freeze, reveal, uniqueness) |
-| `deploy/` | Dockerfile, docker-compose with Caddy, `.env.example` |
+| `deploy/` | Dockerfile, docker-compose, Caddy site block, `deploy.sh`, `.env.example` |
 | `design/` | The design system: tokens, components CSS, Kitti mascot and icons |
 
 ## Run locally
@@ -33,28 +33,55 @@ To try the reveal locally, start the API with an earlier date: `Wichteln__Unlock
 
 ## Deploy
 
-### 1. MySQL on Cybrancee (Plesk)
+```
+Browser ──HTTPS──> wichteln.devilbots.dev (Plesk: Blazor client)
+                        │  fetch + Bearer login token
+                        ▼
+            wichteln-api.devilbots.dev (IONOS VPS: shared Caddy ──> wichteln-api container)
+                        │
+                        ▼
+            hosted MariaDB (devilbots.dev:3306)
+```
 
-1. In Plesk, **Databases → Add Database**: name `wichteln`, create a user.
-2. Under the database user, allow **remote access** from the IONOS VPS IP address (Plesk: *Access control → Allow remote connections from specific hosts*).
-3. Note the host name Plesk shows for MySQL. The API creates its tables on first start.
+### 1. Database on Plesk
 
-### 2. API on the IONOS VPS (Docker + Caddy)
+1. In Plesk, **Databases → Add Database**: `devilbot_wichteln` with a user of the same name.
+2. Allow **remote access** for that user from the VPS IP `217.154.17.113` (like the Momo database).
+3. The API creates its tables on first start.
 
-1. Point a DNS A record, e.g. `api.wichteln.example.de`, at the VPS. Open ports 80 and 443.
-2. On the VPS:
-   ```bash
-   git clone <this repo> wichteln && cd wichteln/deploy
-   cp .env.example .env    # fill in API_DOMAIN, APP_URL, MYSQL_CONNECTION, ADMIN_KEY
-   docker compose up -d --build
-   curl https://api.wichteln.example.de/health
-   ```
-   Caddy fetches the HTTPS certificate automatically. If Caddy already runs on the VPS for other sites, drop the `caddy` service and add the `reverse_proxy` block from `deploy/Caddyfile` to your existing Caddyfile, publishing the API on a local port instead.
-3. Get everyone's personal links:
-   ```bash
-   curl -H "X-Admin-Key: <ADMIN_KEY>" https://api.wichteln.example.de/admin/links
-   ```
-   Send each person only their own link.
+### 2. API on the IONOS VPS (Docker + shared Caddy)
+
+Same setup as Momo Home: the API lives in `/opt/apps/wichteln`, joins the shared `edge` network, and the shared Caddy
+(`/opt/apps/caddy/Caddyfile`) gets the site block from `deploy/Caddyfile.site`.
+
+One-time setup:
+
+1. DNS: an A record `wichteln-api.devilbots.dev` → `217.154.17.113`.
+2. On the VPS, create `/opt/apps/wichteln/deploy/.env` from `deploy/.env.example` (database password, `ADMIN_KEY` from `openssl rand -hex 32`).
+3. Append `deploy/Caddyfile.site` to `/opt/apps/caddy/Caddyfile` and reload Caddy.
+
+Deploy or update from the dev PC (Git Bash), with the same SSH key as Momo (`~/.ssh/momo_ionos`):
+
+```bash
+deploy/deploy.sh root@217.154.17.113
+curl https://wichteln-api.devilbots.dev/health
+```
+
+Useful on the VPS:
+
+```bash
+cd /opt/apps/wichteln/deploy
+docker compose ps
+docker compose logs -f wichteln-api
+```
+
+Get everyone's personal links:
+
+```bash
+curl -H "X-Admin-Key: <ADMIN_KEY>" https://wichteln-api.devilbots.dev/admin/links
+```
+
+Send each person only their own link.
 
 Admin endpoints (all need the `X-Admin-Key` header):
 
@@ -64,9 +91,9 @@ Admin endpoints (all need the `X-Admin-Key` header):
 | `POST /admin/new-link/{name}` | Gives one person a new link (the old one stops working) |
 | `POST /admin/reset-draw` | Deletes the draw and every reveal, for example after a test run |
 
-### 3. Blazor site on Cybrancee (Plesk)
+### 3. Blazor site on Plesk (wichteln.devilbots.dev)
 
-1. Set the API address in `src/Wichteln.Client/wwwroot/appsettings.json` (`ApiBaseUrl`, with a trailing slash).
+1. The API address is set in `src/Wichteln.Client/wwwroot/appsettings.json` (`ApiBaseUrl`, with a trailing slash).
 2. Publish:
    ```bash
    dotnet workload install wasm-tools   # optional, smaller and faster build
@@ -75,7 +102,21 @@ Admin endpoints (all need the `X-Admin-Key` header):
 3. Upload the **contents** of `publish/client/wwwroot` (including the hidden `.htaccess`) to the domain's `httpdocs` folder with the Plesk File Manager or FTP.
 4. `.htaccess` sets the WebAssembly MIME types, serves the pre-compressed Brotli files and sends unknown paths to `index.html`. If your Plesk runs on Windows/IIS, use `publish/client/web.config` instead.
 
-The GitHub Actions workflow builds and tests every push and attaches the published site as an artifact.
+The CI workflow builds and tests every push and attaches the published site as an artifact.
+
+### Automatic deploys
+
+`.github/workflows/deploy.yml` deploys `main` after CI is green: first the API (`deploy/deploy.sh` over SSH), then the client
+(FTPS into the site's document root). It skips each part whose secrets are missing. Repository secrets, as in Momo Home:
+
+| Secret | Value |
+|---|---|
+| `VPS_SSH_KEY` | Private key that can log in to the VPS (the Momo deploy key works) |
+| `VPS_HOST` | `root@217.154.17.113` |
+| `VPS_KNOWN_HOSTS` | Optional: output of `ssh-keyscan 217.154.17.113` |
+| `PLESK_FTP_SERVER`, `PLESK_FTP_USER`, `PLESK_FTP_PASSWORD` | An FTP account for wichteln.devilbots.dev |
+
+If the FTP account opens one level above the document root, add the variable `PLESK_FTP_DIR` = `httpdocs/`.
 
 ## Photos (optional)
 
