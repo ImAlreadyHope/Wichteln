@@ -144,6 +144,7 @@
 /* ---------- AppBar ---------- */
 .wi-appbar { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3) 0; }
 .wi-appbar__text { flex: 1; min-width: 0; }
+.wi-appbar .wi-avatar { --size: 80px; border-radius: var(--radius-lg); } /* header profile picture: 80px rounded square */
 .wi-appbar__hello { margin: 0; font-size: 14px; line-height: 20px; font-weight: 600; color: var(--ink-muted); }
 .wi-appbar__name { margin: 0; font: 600 20px/26px var(--font-display); color: var(--ink); }
 
