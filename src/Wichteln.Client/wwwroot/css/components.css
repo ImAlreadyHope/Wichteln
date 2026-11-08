@@ -105,7 +105,7 @@
   --size: 48px;
   width: var(--size); height: var(--size); flex: none;
   display: grid; place-items: center;
-  border-radius: var(--radius-lg); /* 20px rounded square */
+  border-radius: var(--radius-full);
   background: var(--red-100); color: var(--red-700);
   font: 600 calc(var(--size) * .4)/1 var(--font-display);
   box-shadow: 0 0 0 3px var(--surface-raised);
@@ -144,6 +144,7 @@
 /* ---------- AppBar ---------- */
 .wi-appbar { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3) 0; }
 .wi-appbar__text { flex: 1; min-width: 0; }
+.wi-appbar .wi-avatar { --size: 80px; border-radius: var(--radius-lg); } /* header profile picture: 80px rounded square */
 .wi-appbar__hello { margin: 0; font-size: 14px; line-height: 20px; font-weight: 600; color: var(--ink-muted); }
 .wi-appbar__name { margin: 0; font: 600 20px/26px var(--font-display); color: var(--ink); }
 
@@ -170,7 +171,7 @@
 }
 .wi-reel__track { position: absolute; top: 0; bottom: 0; left: 50%; display: flex; align-items: center; gap: var(--space-4); will-change: transform; }
 .wi-reel__item { width: 112px; flex: none; display: flex; flex-direction: column; align-items: center; gap: var(--space-2); opacity: .55; transform: scale(.86); transition: opacity .3s ease, transform .3s ease; }
-.wi-reel__item .wi-avatar { --size: 80px; }
+.wi-reel__item .wi-avatar { --size: 88px; }
 .wi-reel__name { font: 600 16px/20px var(--font-display); color: var(--ink); }
 .wi-reel__item.is-active { opacity: 1; transform: scale(1.06); }
 .wi-reel__item.is-active .wi-avatar { box-shadow: 0 0 0 4px var(--gold), var(--shadow-pop); }
